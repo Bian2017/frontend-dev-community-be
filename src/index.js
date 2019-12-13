@@ -18,9 +18,6 @@ const router = new Router();
 
 const isDevMode = process.env.NODE_ENV === 'production' ? false : true;
 
-// 路径前缀
-router.prefix('/api');
-
 // 定义无需JWT鉴权的公共路径
 const jwt = JWT({ secret: config.JWT_SECRET }).unless({ path: [/^\/public/, /^\/login/] });
 
