@@ -18,7 +18,7 @@ class PublicController {
     // 过期就会自动删除
     setValue(body.sid, newCaptcha.text, 10 * 60);
     ctx.body = {
-      code: 0,
+      code: 200,
       data: newCaptcha.data
     };
   }
