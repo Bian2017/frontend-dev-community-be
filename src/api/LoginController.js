@@ -1,5 +1,6 @@
 import moment from 'moment';
 import jsonwebtoken from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import User from '@/model/User';
 import send from '@/config/MailConfig';
 import config from '@/config/index';
@@ -43,7 +44,7 @@ class LoginController {
    */
   async login(ctx) {
     const { body } = ctx.request;
-    const { sid, code, username } = body;
+    const { sid, code, username, password } = body;
 
     const result = await checkCode(sid, code);
 
@@ -53,7 +54,8 @@ class LoginController {
       let user = await User.findOne({ username });
 
       let checkUserPassword = '';
-      if (user.password === body.password) {
+      // 解密密码: 前面是明文密码，后面是哈希密码
+      if (await bcrypt.compare(password, user.password)) {
         checkUserPassword = true;
       }
 
@@ -77,10 +79,65 @@ class LoginController {
     } else {
       // 图片验证码失败
       ctx.body = {
-        code: 401,
+        code: 500,
         msg: '图片验证码不正确，请检查'
       };
     }
+  }
+
+  async reg(ctx) {
+    const { body } = ctx.request;
+    const { sid, code, username, name, password } = body;
+    let msg = {};
+    let check = true;
+
+    const result = await checkCode(sid, code);
+
+    // 服务端校验
+    if (result) {
+      // 邮箱
+      let user1 = await User.findOne({ username });
+      if (user1 !== null && typeof user1.username !== 'undefined') {
+        msg.username = ['此邮箱已经注册，可以通过邮箱找回密码'];
+        check = false;
+      }
+
+      // 昵称
+      let user2 = await User.findOne({ name });
+      if (user2 !== null && typeof user2.name !== 'undefined') {
+        msg.name = ['此昵称已经被注册，请修改'];
+        check = false;
+      }
+
+      if (check) {
+        // 随机产生一个盐
+        const cryptPassword = await bcrypt.hash(password, 5);
+
+        let user = new User({
+          username,
+          name,
+          password: cryptPassword,
+          created: moment().format('YYYY-MM-DD HH:mm:ss')
+        });
+
+        const res = await user.save();
+
+        ctx.body = {
+          code: 200,
+          data: res,
+          msg: '注册成功'
+        };
+        return;
+      }
+    } else {
+      // code表示验证码
+      msg.code = ['验证码已经失效，请重新获取'];
+    }
+
+    ctx.body = {
+      code: 500,
+      msg
+    };
   }
 }
 
