@@ -11,7 +11,8 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
   username: { type: String },
   name: { type: String },
-  password: { type: String }
+  password: { type: String },
+  created: { type: String }
 });
 
 // 链接数据库的collection， users表示collection的名称，UserSchema表示collection的数据结构
