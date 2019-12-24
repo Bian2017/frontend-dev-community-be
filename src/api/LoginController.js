@@ -98,14 +98,14 @@ class LoginController {
 
     // 利用服务端进行表单校验
     if (result) {
-      // 邮箱
+      // 进行去重校验：邮箱
       const user1 = await User.findOne({ username });
       if (user1 !== null && typeof user1.username !== 'undefined') {
         msg.username = ['此邮箱已经注册，可以通过邮箱找回密码'];
         check = false;
       }
 
-      // 昵称
+      // 进行去重校验：昵称
       const user2 = await User.findOne({ name });
       if (user2 !== null && typeof user2.name !== 'undefined') {
         msg.name = ['此昵称已经被注册，请修改'];
