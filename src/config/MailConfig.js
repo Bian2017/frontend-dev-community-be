@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer'
 // 密码重置url
 const RESET_URL = 'https://www.baidu.com'
 
-async function send(sendInfo) {
+async function send (sendInfo) {
   // create reusable transporter object using the default SMTP transport
   const transporter = nodemailer.createTransport({
     host: 'smtp.qq.com', // SMTP服务器域名
