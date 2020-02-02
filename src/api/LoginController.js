@@ -1,4 +1,4 @@
-import moment from 'moment'
+import dayjs from 'dayjs'
 import jsonwebtoken from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import User from '@/model/User'
@@ -16,7 +16,7 @@ class LoginController {
       const result = await send({
         code: '1234', // 验证码
         // 30分钟过期
-        expire: moment()
+        expire: dayjs()
           .add(30, 'm')
           .format('YYYY-MM-DD HH:mm:ss'),
         email: username, // 用户邮箱
@@ -118,7 +118,7 @@ class LoginController {
           username,
           name,
           password: cryptPassword,
-          created: moment().format('YYYY-MM-DD HH:mm:ss')
+          created: dayjs().format('YYYY-MM-DD HH:mm:ss')
         })
         const res = await user.save()
 
