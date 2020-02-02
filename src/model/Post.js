@@ -50,6 +50,24 @@ PostSchema.statics = {
          */
         select: 'name isVip pic'
       })
+  },
+  /**
+   * 获取本周热议
+   */
+  getTopWeek: function () {
+    return this.find({
+      // 获取近七天内的数据
+      created: {
+        $gte: dayjs().subtract(7, 'days')
+      }
+    }, {
+      // 需显示哪些数据，1表示显示
+      answer: 1,
+      title: 1
+    }).sort({
+      // 使用answer进行倒序排列
+      answer: -1
+    }).limit(15) // 一页只需15条
   }
 }
 

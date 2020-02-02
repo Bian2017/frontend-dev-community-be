@@ -1,6 +1,8 @@
 import Post from '@/model/Post'
+import Links from '@/model/Links'
 
 class ContentController {
+  // 查询发帖列表
   async getPostList (ctx) {
     const { query } = ctx
 
@@ -18,12 +20,8 @@ class ContentController {
       options.isTop = query.isTop
     }
 
-    if (typeof query.status !== 'undefined') {
+    if (typeof query.status !== 'undefined' && query.status !== '') {
       options.status = query.status
-    }
-
-    if (typeof query.isEnd !== 'undefined') {
-      options.isEnd = query.isEnd
     }
 
     if (typeof query.tag !== 'undefined' && query.tag !== '') {
@@ -37,6 +35,36 @@ class ContentController {
       code: 200,
       data: result,
       msg: '成功获取帖子列表'
+    }
+  }
+
+  // 查询友链
+  async getLinks (ctx) {
+    const result = await Links.find({ type: 'links' })
+
+    ctx.body = {
+      code: 200,
+      data: result
+    }
+  }
+
+  // 查询温馨提醒
+  async getTips (ctx) {
+    const result = await Links.find({ type: 'tips' })
+
+    ctx.body = {
+      code: 200,
+      data: result
+    }
+  }
+
+  // 本周热议
+  async getTopWeek (ctx) {
+    const result = await Post.getTopWeek()
+
+    ctx.body = {
+      code: 200,
+      data: result
     }
   }
 }

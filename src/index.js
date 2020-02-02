@@ -28,7 +28,7 @@ const middleware = compose([
   // 中间件的处理是有顺序的，所以先处理request中的数据
   koaBody(),
   // 绝对路径
-  statics(path.join(__dirname, './public')),
+  statics(path.join(__dirname, '../public')),
   // 处理跨域请求
   cors(),
   json({ pretty: false, param: 'pretty' }),
