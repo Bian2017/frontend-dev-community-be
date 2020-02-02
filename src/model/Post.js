@@ -48,7 +48,7 @@ PostSchema.statics = {
          * 联合查询的时候，有些字段是需要的，有些字段是不需要的。
          * 可以通过select筛选出我们需要的字段，去隐藏敏感字段。
          */
-        select: 'name'
+        select: 'name isVip pic'
       })
   }
 }
