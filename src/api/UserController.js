@@ -29,7 +29,7 @@ class UserController {
         // 有上一次的签到记录，并且不与今天相同，进行连续签到的判断
         let count = user.count
         let fav = 0
-        if (dayjs(record.lastSign).format('YYYY-MM-DD') === dayjs().subtract(1, 'days').format('YYYY-MM-DD')) {
+        if (dayjs(record.created).format('YYYY-MM-DD') === dayjs().subtract(1, 'days').format('YYYY-MM-DD')) {
           // 用户上一次签到的时间等于当前时间的前一天，说明用户在连续签到
           count += 1 // 此时客户已签到，需自加一
           if (count < 5) {
@@ -78,8 +78,7 @@ class UserController {
         // 更新签到记录
         newRecord = new SignRecord({
           uid: obj._id,
-          favs: fav,
-          lastSign: record.created // 上次记录的创建时间是本次记录的lastSign
+          favs: fav
         })
 
         await newRecord.save()
@@ -96,8 +95,7 @@ class UserController {
       // 保存用户的签到记录
       newRecord = new SignRecord({
         uid: obj._id,
-        favs: 5,
-        lastSign: dayjs().format('YYYY-MM-DD HH:mm:ss')
+        favs: 5
       })
 
       await newRecord.save()

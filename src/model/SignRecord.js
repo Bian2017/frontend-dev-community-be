@@ -10,8 +10,7 @@ const SignRecordSchema = new Schema({
   // 通过ref方法，让uid与uses表做一个对应，相当于是一个子引用
   uid: { type: String, ref: 'users' },
   created: { type: Date },
-  favs: { type: Number },
-  lastSign: { type: Date }
+  favs: { type: Number }
 })
 
 SignRecordSchema.pre('save', function (next) {
