@@ -61,13 +61,21 @@ class LoginController {
       }
 
       if (checkUserPassword) {
+        // Mongoose提供了toJSON方法，将文档转换成JSON对象
+        const userObj = user.toJSON()
+        const arrs = ['password', 'username', 'mobile', 'roles']
+        arrs.map(item => {
+          delete userObj[item]
+        })
+
         // 验证通过，返回Token值
-        const token = jsonwebtoken.sign({ _id: 'LI' }, config.JWT_SECRET, {
+        const token = jsonwebtoken.sign({ _id: userObj._id }, config.JWT_SECRET, {
           expiresIn: '1d'
         })
 
         ctx.body = {
           code: 200,
+          data: userObj,
           token: token
         }
       } else {
