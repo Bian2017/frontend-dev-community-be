@@ -2,9 +2,8 @@
  * 邮箱配置
  */
 import nodemailer from 'nodemailer'
-
-// 密码重置url
-const RESET_URL = 'https://www.baidu.com'
+import config from '@/config/index'
+import qs from 'qs'
 
 async function send (sendInfo) {
   // create reusable transporter object using the default SMTP transport
@@ -18,11 +17,16 @@ async function send (sendInfo) {
     }
   })
 
+  // 密码重置url
+  const baseUrl = config.baseUrl
+  const route = sendInfo.type === 'email' ? 'confirm' : 'reset'
+  const RESET_URL = `${baseUrl}/${route}?` + qs.stringify(sendInfo.data)
+
   const info = await transporter.sendMail({
     from: '"邮件测试" <shimu_cumt_zju@foxmail.com>', // "发件人" <发送者邮箱>
     to: sendInfo.email, // 收件人
     // 邮件主题
-    subject: sendInfo.user !== '' ? `${sendInfo.user}你好，密码重置连接` : '密码重置连接',
+    subject: sendInfo.user !== '' && sendInfo.type !== 'email' ? `${sendInfo.user}你好，论坛注册码` : '确认修改邮件链接',
     // 邮件缩略的纯文本消息
     text: `您的邀请码是${sendInfo.code}，邀请码的过期时间是${sendInfo.expire}`,
     // 邮件正文(其实就是HTML页面)

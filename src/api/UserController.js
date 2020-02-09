@@ -1,7 +1,12 @@
 import { getJWTPayload } from '@/common/Utils'
 import SignRecord from '@/model/SignRecord'
 import User from '@/model/User'
+import send from '@/config/MailConfig'
 import dayjs from 'dayjs'
+import uuid from 'uuid/v4'
+import jwt from 'jsonwebtoken'
+import { setValue, getValue } from '@/config/RedisConfig'
+import config from '@/config/index'
 
 class UserController {
   // 用户签到接口
@@ -113,6 +118,87 @@ class UserController {
       msg: '请求成功',
       ...result,
       lastSign: newRecord.created
+    }
+  }
+
+  // 更新用户基本信息接口
+  async updateUserInfo (ctx) {
+    const { body } = ctx.request
+    const obj = await getJWTPayload(ctx.header.authorization)
+    let msg = ''
+
+    // 如果User的静态方法屏蔽了你所需数据的属性，可以直接使用findOne方法
+    const user = await User.findOne({ _id: obj._id })
+
+    // 用户修改了邮箱，发送reset邮件
+    if (body.username && body.username !== user.username) {
+      // 判断用户的新邮箱是否已经有人注册
+      const tmpUser = await User.findOne({ username: body.username })
+      if (tmpUser && tmpUser.password) {
+        ctx.body = {
+          code: 501,
+          msg: '邮箱已经注册'
+        }
+        return
+      }
+
+      const key = uuid()
+      setValue(key, jwt.sign({ _id: obj._id }, config.JWT_SECRET, {
+        expiresIn: '30m'
+      }))
+
+      await send({
+        type: 'email', // 根据不同的type对应不同的url
+        code: '', // 验证码
+        data: {
+          key: key,
+          username: body.username // 新的邮件
+        },
+        // 30分钟过期
+        expire: dayjs()
+          .add(30, 'm')
+          .format('YYYY-MM-DD HH:mm:ss'),
+        email: user.username, // 给旧的邮箱发送邮件
+        user: user.name // 用户昵称
+      })
+
+      msg = '更新基本资料成功，账号修改需要邮件确认，请查收邮件'
+    }
+
+    // 由于update权限非常高，不希望用户对敏感字段也可以进行更新，故可通过如下方式排出敏感字段
+    const arr = ['username', 'mobile', 'password']
+    arr.map(item => {
+      delete body[item]
+    })
+    const result = await User.updateOne({ _id: obj._id }, body)
+
+    if (result.n === 1 && result.ok === 1) {
+      ctx.body = {
+        code: 200,
+        msg: msg === '' ? '更新成功' : msg
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '更新失败'
+      }
+    }
+  }
+
+  // 更新用户名(即邮箱)
+  async updateUsername (ctx) {
+    const query = ctx.query
+
+    if (query.key) {
+      const token = await getValue(query.key)
+      const obj = getJWTPayload('Bearer ' + token)
+      await User.updateOne({ _id: obj._id }, {
+        username: query.username
+      })
+      ctx.body = {
+        code: 200,
+        msg: '更新用户名成功'
+      }
     }
   }
 }
