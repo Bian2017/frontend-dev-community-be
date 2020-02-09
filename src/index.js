@@ -26,7 +26,17 @@ const jwt = JWT({ secret: config.JWT_SECRET }).unless({ path: [/^\/public/, /^\/
  */
 const middleware = compose([
   // 中间件的处理是有顺序的，所以先处理request中的数据
-  koaBody(),
+  koaBody({
+    multipart: true, // 默认值是false，即不能接收图片上传。
+    // formidable 主要去设置上传图片的大小、上传图片的路径...
+    formidable: {
+      keepExtension: true, // 保持文件的后缀
+      maxFiledsSize: 5 * 1024 * 1024 // 最大图片为5M
+    },
+    onError: err => {
+      console.log('koabody tcl:err', err)
+    }
+  }),
   // 绝对路径
   statics(path.join(__dirname, '../public')),
   // 处理跨域请求
