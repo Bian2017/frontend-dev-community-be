@@ -20,7 +20,7 @@ SignRecordSchema.pre('save', function (next) {
 
 SignRecordSchema.statics = {
   findByUid: function (uid) {
-    // 进行倒序排列
+    // 进行倒序排列：created最新的在前面
     return this.findOne({ uid: uid }).sort({ created: -1 })
   }
 }

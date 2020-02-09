@@ -22,7 +22,8 @@ class UserController {
           code: 500,
           favs: user.favs,
           count: user.count,
-          msg: '用户已经签到'
+          msg: '用户已经签到',
+          lastSign: record.created
         }
         return
       } else {
@@ -110,7 +111,8 @@ class UserController {
     ctx.body = {
       code: 200,
       msg: '请求成功',
-      ...result
+      ...result,
+      lastSign: newRecord.created
     }
   }
 }

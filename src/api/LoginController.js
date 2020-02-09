@@ -5,6 +5,7 @@ import User from '@/model/User'
 import send from '@/config/MailConfig'
 import config from '@/config/index'
 import { checkCode } from '@/common/Utils'
+import SignRecord from '@/model/SignRecord'
 
 class LoginController {
   // 忘记密码
@@ -72,6 +73,21 @@ class LoginController {
         const token = jsonwebtoken.sign({ _id: userObj._id }, config.JWT_SECRET, {
           expiresIn: '1d'
         })
+
+        // 加入isSign属性
+        const signRecord = await SignRecord.findByUid(userObj._id)
+        if (signRecord !== null) {
+          // 用户上一次签到记录的创建时间是否与当前时间一致
+          if (dayjs(signRecord.created).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')) {
+            userObj.isSign = true
+          } else {
+            userObj.isSign = false
+          }
+          userObj.lastSign = signRecord.created
+        } else {
+          // 用户无签到记录
+          userObj.isSign = false
+        }
 
         ctx.body = {
           code: 200,
