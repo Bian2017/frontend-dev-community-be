@@ -4,6 +4,9 @@
 import mongoose from 'mongoose'
 import config from './index'
 
+// 解决waring报错
+mongoose.set('useCreateIndex', true)
+
 // 创建连接
 mongoose.connect(config.DB_URL, {
   useNewUrlParser: true,
@@ -22,7 +25,7 @@ mongoose.connection.on('error', err => {
 
 // 断开连接
 mongoose.connection.on('disconnected', () => {
-  console.log(`Mongoose connection disconnected!`)
+  console.log('Mongoose connection disconnected!')
 })
 
 export default mongoose
