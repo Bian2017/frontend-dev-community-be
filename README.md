@@ -60,6 +60,8 @@
   "restart": true,
   // 通过内部终端显示console日志
   "console": "integratedTerminal",
+  // 指定node版本
+  "runtimeVersion": "12.14.0", 
   "runtimeArgs": [
     "run-script",
     // 将debug改成start:dist
@@ -78,11 +80,24 @@
 
 ### 1. bcrypt依赖包安装失败问题
 
-针对bcrypt依赖包安装失败问题，可以通过如下方式进行解决：
+**bcrypt对版本要求非常严苛**，如下所示(见npm官网)。
+
+Node Version|	Bcrypt Version
+---|---
+0.4	| <= 0.4
+0.6, 0.8, 0.10|	>= 0.5
+0.11	|>= 0.8
+4	| <= 2.1.0
+8	| >= 1.0.3
+10, 11 |	>= 3
+12 |	>= 3.0.6
+
+bcrypt依赖包版本若大于`3.0.5`，是需要使用node v12版本。如果本地node版本是v10，最好写死bcrypt依赖包版本，即版本为`3.0.5`。
+
+如果还存在bcrypt依赖包安装失败问题，还可以通过如下方式进行解决：
 
 > sudo npm install --unsafe-perm 
 
-bcrypt依赖包它对node版本的要求非常严苛，bcrypt依赖包版本若大于`3.0.5`，是需要使用node v12版本。如果本地node版本是v10，最好写死bcrypt依赖包版本，即版本为`3.0.5`。
 
 
 
