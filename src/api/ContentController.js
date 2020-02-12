@@ -1,11 +1,13 @@
 import Post from '@/model/Post'
 import Links from '@/model/Links'
+import User from '@/model/User'
 import fs from 'fs' // 操作本地文件
 import uuid from 'uuid/v4'
 import dayjs from 'dayjs'
 import config from '@/config'
 // import { dirExists } from '@/common/Utils'
 import makedir from 'make-dir'
+import { checkCode, getJWTPayload } from '@/common/Utils'
 
 class ContentController {
   // 查询发帖列表
@@ -143,6 +145,48 @@ class ContentController {
       code: 200,
       msg: '图片上传成功',
       data: filePath
+    }
+  }
+
+  // 添加新帖
+  async addPost (ctx) {
+    const { body } = ctx.request
+    const sid = body.sid
+    const code = body.code
+
+    // 验证图片验证码的时效性、正确性
+    const result = await checkCode(sid, code)
+    if (result) {
+      const obj = await getJWTPayload(ctx.header.authorization)
+
+      // 判断用户的积分数是否 > fav，否则，提升用户积分不足发帖
+      // 用户积分足够的时候，新建Post，减除用户对应的积分
+      const user = await User.findByID({ _id: obj._id })
+      if (user.favs < body.fav) {
+        ctx.body = {
+          code: 501,
+          msg: '积分不足'
+        }
+        return
+      } else {
+        await User.updateOne({ _id: obj._id }, { $inc: { favs: -body.fav } })
+      }
+
+      const newPost = new Post(body)
+      newPost.uid = obj._id
+
+      const result = await newPost.save()
+
+      ctx.body = {
+        code: 200,
+        msg: '文章保存成功',
+        data: result
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '图片验证码验证失败'
+      }
     }
   }
 }

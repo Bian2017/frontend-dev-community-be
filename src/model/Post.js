@@ -11,13 +11,18 @@ const PostSchema = new Schema({
   created: { type: Date },
   catalog: { type: String },
   fav: { type: String },
-  isEnd: { type: String },
-  reads: { type: Number },
-  answer: { type: Number },
-  status: { type: String },
-  isTop: { type: String },
-  sort: { type: String },
-  tags: { type: Array }
+  isEnd: { type: String, default: '0' }, // 是否结贴
+  reads: { type: Number, default: 0 },
+  answer: { type: Number, default: 0 },
+  status: { type: String, default: '0' }, // 是否打开回复
+  isTop: { type: String, default: '0' }, // 是否置顶
+  sort: { type: String, default: 100 }, // 随着数值的减小，按照数值的倒序进行排列
+  tags: {
+    type: Array,
+    default: [
+    // { name: '', class: '' }
+    ]
+  }
 })
 
 // Pre中间件：每次save触发事件
