@@ -73,6 +73,14 @@ PostSchema.statics = {
       // 使用answer进行倒序排列
       answer: -1
     }).limit(15) // 一页只需15条
+  },
+  findByTid: function (id) {
+    return this.findOne({ _id: id })
+    // lookup这种联合查询，它会查取所有字段。populate则可以查询你想要的字段
+      .populate({
+        path: 'uid', // 要替换的字段或者说需查询的对应文档
+        select: 'name pic isVip _id' // 想查询的字段
+      })
   }
 }
 

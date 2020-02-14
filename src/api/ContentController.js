@@ -7,7 +7,7 @@ import dayjs from 'dayjs'
 import config from '@/config'
 // import { dirExists } from '@/common/Utils'
 import makedir from 'make-dir'
-import { checkCode, getJWTPayload } from '@/common/Utils'
+import { checkCode, getJWTPayload, rename } from '@/common/Utils'
 
 class ContentController {
   // 查询发帖列表
@@ -187,6 +187,30 @@ class ContentController {
         code: 500,
         msg: '图片验证码验证失败'
       }
+    }
+  }
+
+  // 获取文章详情
+  async getPostDetail (ctx) {
+    const { query } = ctx
+
+    if (!query.tid) {
+      ctx.body = {
+        code: 500,
+        msg: '文章标题为空'
+      }
+      return
+    }
+
+    const post = await Post.findByTid(query.tid)
+
+    // 更改字段名称
+    const result = rename(post.toJSON(), 'uid', 'user')
+
+    ctx.body = {
+      code: 200,
+      data: result,
+      msg: '查询文章详情成功'
     }
   }
 }
