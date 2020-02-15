@@ -28,8 +28,11 @@ CommentsSchema.post('save', function (error, doc, next) {
 })
 
 CommentsSchema.statics = {
-  findByTid: function (id) {
+  findByTid: function (id) { // 通过帖子去查评论，此时会有多条评论
     return this.find({ tid: id })
+  },
+  findByCid: function (id) { // 根据评论ID查证评论，只会有一条数据
+    return this.findOne({ _id: id })
   },
   getCommentsList: function (id, page, limit) {
     // 一条帖子下有多条评论，故使用find，不使用findOne
