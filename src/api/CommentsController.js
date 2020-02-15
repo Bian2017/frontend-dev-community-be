@@ -28,7 +28,11 @@ class CommentsController {
     let result = await Comments.getCommentsList(tid, parseInt(page), parseInt(limit))
 
     // 判断用户是否登录，已登录的用户还需去查询当前用户对该评论是否已点过赞
-    const obj = await getJWTPayload(ctx.header.authorization)
+    let obj = {}
+    if (typeof ctx.header.authorization !== 'undefined') {
+      obj = await getJWTPayload(ctx.header.authorization)
+    }
+
     if (typeof obj._id !== 'undefined') {
       result = result.map(item => item.toJSON()) // result当前数据是Schema，JSON转化的目的主要是方便添加属性
 
@@ -82,11 +86,20 @@ class CommentsController {
 
     newComment.cuid = obj._id
     const comment = await newComment.save()
+    // 更新评论总数
+    const updateRes = await Post.updateOne({ _id: body.tid }, { $inc: { answer: 1 } })
 
-    ctx.body = {
-      code: 200,
-      data: comment,
-      msg: '评论成功'
+    if (comment._id && updateRes.ok === 1) {
+      ctx.body = {
+        code: 200,
+        data: comment,
+        msg: '评论成功'
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '评论失败'
+      }
     }
   }
 

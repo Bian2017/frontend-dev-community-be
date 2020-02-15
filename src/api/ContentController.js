@@ -203,14 +203,23 @@ class ContentController {
     }
 
     const post = await Post.findByTid(query.tid)
+    // 更新文章阅读计数
+    const reads = await Post.updateOne({ _id: query.tid }, { $inc: { reads: 1 } })
 
     // 更改字段名称
     const result = rename(post.toJSON(), 'uid', 'user')
 
-    ctx.body = {
-      code: 200,
-      data: result,
-      msg: '查询文章详情成功'
+    if (post._id && reads.ok === 1) {
+      ctx.body = {
+        code: 200,
+        data: result,
+        msg: '查询文章详情成功'
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '获取文章详情失败'
+      }
     }
   }
 }
