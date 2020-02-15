@@ -4,14 +4,9 @@ import dayjs from 'dayjs'
 const Schema = mongoose.Schema
 
 const CommentsHandsSchema = new Schema({
-  tid: { type: String, ref: 'post' },
-  cuid: { type: String, ref: 'user' },
-  content: { type: String },
-  created: { type: Date },
-  hands: { type: Number, default: 0 },
-  status: { type: String, default: '1' },
-  isRead: { type: String, default: '0' },
-  isBest: { type: String, default: '0' }
+  cid: { type: String },
+  uid: { type: String },
+  created: { type: Date }
 })
 
 CommentsHandsSchema.pre('save', function (next) {
@@ -28,8 +23,8 @@ CommentsHandsSchema.post('save', function (error, doc, next) {
 })
 
 CommentsHandsSchema.statics = {
-  findByTid: function (id) {
-    return this.find({ tid: id })
+  findByCid: function (id) {
+    return this.find({ cid: id })
   }
 }
 

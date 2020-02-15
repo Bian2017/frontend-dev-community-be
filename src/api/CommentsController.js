@@ -1,6 +1,7 @@
 import Comments from '@/model/Comments'
 import Post from '@/model/Post'
 import User from '@/model/User'
+import CommentsHands from '@/model/CommentsHands'
 import { checkCode, getJWTPayload } from '@/common/Utils'
 
 // 是否禁言
@@ -23,8 +24,25 @@ class CommentsController {
   async getComments (ctx) {
     const { tid, page = 0, limit = 10 } = ctx.query
 
-    const result = await Comments.getCommentsList(tid, parseInt(page), parseInt(limit))
     const total = await Comments.queryCount(tid)
+    let result = await Comments.getCommentsList(tid, parseInt(page), parseInt(limit))
+
+    // 判断用户是否登录，已登录的用户还需去查询当前用户对该评论是否已点过赞
+    const obj = await getJWTPayload(ctx.header.authorization)
+    if (typeof obj._id !== 'undefined') {
+      result = result.map(item => item.toJSON()) // result当前数据是Schema，JSON转化的目的主要是方便添加属性
+
+      for (let i = 0; i < result.length; i++) {
+        const item = result[i]
+
+        item.handed = '0'
+        // 查询当前用户对当前评论是否有过点赞
+        const commentsHands = await CommentsHands.findOne({ cid: item._id, uid: obj._id })
+        if (commentsHands && commentsHands.cid) {
+          item.handed = '1'
+        }
+      }
+    }
 
     ctx.body = {
       code: 200,
@@ -142,6 +160,44 @@ class CommentsController {
       ctx.body = {
         code: 500,
         msg: '帖子已结贴，无法重复设置'
+      }
+    }
+  }
+
+  async setHands (ctx) {
+    const { query } = ctx
+    const obj = await getJWTPayload(ctx.header.authorization)
+
+    // 判断用户是否已经点赞，防止客户恶意请求接口
+    const tmp = await CommentsHands.find({ cid: query.cid, uid: obj._id })
+    if (tmp.length > 0) {
+      ctx.body = {
+        code: 500,
+        msg: '您已经点赞，请勿重复点赞'
+      }
+      return
+    }
+
+    // 新增一条点赞纪录
+    const newHands = new CommentsHands({
+      cid: query.cid, // 帖子ID
+      uid: obj._id // 用户ID
+    })
+
+    const data = await newHands.save()
+
+    // 更新comments表中对应的记录的hands信息 + 1
+    const result = await Comments.updateOne({ _id: query.cid }, { $inc: { hands: 1 } })
+    if (result.ok === 1) {
+      ctx.body = {
+        code: 200,
+        msg: '点赞成功',
+        data
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '保存点赞记录失败'
       }
     }
   }
