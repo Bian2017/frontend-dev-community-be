@@ -20,6 +20,9 @@ router.get('/set-collect', userController.setCollect)
 // 获取用户发帖记录
 router.get('/post', contentController.getPostByUid)
 
+// 获取用户收藏记录
+router.get('/collect', contentController.getCollectionByUid)
+
 // 删除发帖记录
 router.get('/delete-post', contentController.deletePostByUid)
 

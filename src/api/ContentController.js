@@ -336,6 +336,28 @@ class ContentController {
       }
     }
   }
+
+  // 获取收藏列表
+  async getCollectionByUid (ctx) {
+    const { query: { page = 0, limit = 10 } } = ctx
+    const obj = await getJWTPayload(ctx.header.authorization)
+    const result = await UserCollect.getListByUid(obj._id, parseInt(page), parseInt(limit))
+    const total = await UserCollect.countByUid(obj._id)
+
+    if (result.length > 0) {
+      ctx.body = {
+        code: 200,
+        data: result,
+        total,
+        msg: '查询列表成功'
+      }
+    } else {
+      ctx.bodyo = {
+        code: 500,
+        msg: '查询列表失败'
+      }
+    }
+  }
 }
 
 export default new ContentController()

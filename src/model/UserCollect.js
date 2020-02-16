@@ -23,6 +23,18 @@ UserCollectSchema.post('save', function (err, doc, next) {
   }
 })
 
-const UserCollectModel = mongoose.model('user_collects', UserCollectSchema)
+// 添加静态方法
+UserCollectSchema.statics = {
+  // 查询特定用户的收藏数据
+  getListByUid: function (id, page, limit) {
+    return this.find({ uid: id }).skip(page * limit).limit(limit).sort({ created: -1 }) // 倒序排列
+  },
+  // 查询总数
+  countByUid: function (id) {
+    return this.find({ uid: id }).countDocuments()
+  }
+}
+
+const UserCollectModel = mongoose.model('user_collect', UserCollectSchema)
 
 export default UserCollectModel
