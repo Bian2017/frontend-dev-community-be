@@ -56,6 +56,25 @@ class CommentsController {
     }
   }
 
+  // 获取用户最近的评论记录
+  async getCommentPublic (ctx) {
+    const { query: { uid, page = 0, limit = 10 } } = ctx
+    const result = await Comments.getCommentsPublic(uid, parseInt(page), parseInt(limit))
+
+    if (result.length > 0) {
+      ctx.body = {
+        code: 200,
+        data: result,
+        msg: '查询成功'
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '查询失败'
+      }
+    }
+  }
+
   // 添加评论
   async addComment (ctx) {
     const check = await canReply(ctx)

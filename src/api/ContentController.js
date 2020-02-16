@@ -308,6 +308,28 @@ class ContentController {
     }
   }
 
+  // 获取用户发帖记录
+  async getPostPublic (ctx) {
+    const { query: { limit = 10, page = 0, uid } } = ctx
+
+    const result = await Post.getListByUid(uid, parseInt(page), parseInt(limit))
+    const total = await Post.countByUid(uid)
+
+    if (result.length > 0) {
+      ctx.body = {
+        code: 200,
+        data: result,
+        total,
+        msg: '查询列表成功'
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '查询列表失败'
+      }
+    }
+  }
+
   // 删除发帖记录
   async deletePostByUid (ctx) {
     const { query } = ctx

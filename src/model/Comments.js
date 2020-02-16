@@ -5,7 +5,7 @@ const Schema = mongoose.Schema
 
 const CommentsSchema = new Schema({
   tid: { type: String, ref: 'post' },
-  cuid: { type: String, ref: 'users' },
+  cuid: { type: String, ref: 'users' }, // 评论用户的ID
   content: { type: String },
   created: { type: Date },
   hands: { type: Number, default: 0 }, // 除了递增的需要使用Number类型，其他状态量都使用String类型
@@ -47,6 +47,12 @@ CommentsSchema.statics = {
   },
   queryCount: function (id) {
     return this.find({ tid: id }).countDocuments() // 获取total值
+  },
+  getCommentsPublic: function (id, page, limit) {
+    return this.find({ cuid: id }).populate({
+      path: 'tid',
+      select: '_id title'
+    }).skip(page * limit).limit(limit).sort({ created: -1 })
   }
 }
 
