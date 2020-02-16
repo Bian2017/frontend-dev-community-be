@@ -234,6 +234,29 @@ class UserController {
       }
     }
   }
+
+  // 获取用户基本信息
+  async getBasicInfo (ctx) {
+    const { query: { uid } } = ctx
+
+    let user = await User.findByID(uid)
+    user = user.toJSON()
+
+    // 取得用户的签到记录，看下签到记录有没有大于今天
+    const date = dayjs().format('YYYY-MM-DD')
+    const result = await SignRecord.findOne({ uid: uid, created: { $gte: date + ' 00:00:00' } })
+    if (result && result.uid) {
+      user.isSign = true
+    } else {
+      user.isSign = false
+    }
+
+    ctx.body = {
+      code: 200,
+      data: user,
+      msg: '查询成功'
+    }
+  }
 }
 
 export default new UserController()
