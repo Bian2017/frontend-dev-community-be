@@ -81,6 +81,12 @@ PostSchema.statics = {
         path: 'uid', // 要替换的字段或者说需查询的对应文档
         select: 'name pic isVip _id' // 想查询的字段
       })
+  },
+  getListByUid: function (id, page, limit) {
+    return this.find({ uid: id }).skip(page * limit).limit(limit).sort({ created: -1 }) // 倒序排列
+  },
+  countByUid: function (id) {
+    return this.find({ uid: id }).countDocuments()
   }
 }
 

@@ -284,6 +284,58 @@ class ContentController {
       }
     }
   }
+
+  // 获取用户发帖记录
+  async getPostByUid (ctx) {
+    const { query: { limit = 10, page = 0 } } = ctx
+
+    const obj = await getJWTPayload(ctx.header.authorization)
+    const result = await Post.getListByUid(obj._id, parseInt(page), parseInt(limit))
+    const total = await Post.countByUid(obj._id)
+
+    if (result.length > 0) {
+      ctx.body = {
+        code: 200,
+        data: result,
+        total,
+        msg: '查询列表成功'
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '查询列表失败'
+      }
+    }
+  }
+
+  // 删除发帖记录
+  async deletePostByUid (ctx) {
+    const { query } = ctx
+    const obj = await getJWTPayload(ctx.header.authorization)
+    const post = await Post.findOne({ _id: query.tid })
+
+    // 判断是否是用户本人，且帖子未结贴等才可以删除
+    if (post.uid === obj._id && post.isEnd === '0') {
+      const result = await Post.deleteOne({ _id: query.tid })
+
+      if (result.ok === 1) {
+        ctx.body = {
+          code: 200,
+          msg: '删除成功'
+        }
+      } else {
+        ctx.body = {
+          code: 500,
+          msg: '执行删除失败'
+        }
+      }
+    } else {
+      ctx.body = {
+        code: 500,
+        msg: '删除失败，无操作权限'
+      }
+    }
+  }
 }
 
 export default new ContentController()
