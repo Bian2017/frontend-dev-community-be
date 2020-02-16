@@ -1,6 +1,7 @@
 import { getJWTPayload } from '@/common/Utils'
 import SignRecord from '@/model/SignRecord'
 import User from '@/model/User'
+import UserCollect from '@/model/UserCollect'
 import send from '@/config/MailConfig'
 import dayjs from 'dayjs'
 import uuid from 'uuid/v4'
@@ -198,6 +199,38 @@ class UserController {
       ctx.body = {
         code: 200,
         msg: '更新用户名成功'
+      }
+    }
+  }
+
+  // 设置收藏
+  async setCollect (ctx) {
+    const { query } = ctx
+    const obj = await getJWTPayload(ctx.header.authorization)
+
+    if (parseInt(query.isFav)) {
+      // 说明用户已经收藏了帖子，需取消收藏
+      await UserCollect.deleteOne({ uid: obj._id, tid: query.tid })
+
+      ctx.body = {
+        code: 200,
+        msg: '取消收藏成功'
+      }
+    } else {
+      const newCollect = new UserCollect({
+        uid: obj._id,
+        tid: query.tid,
+        title: query.title
+      })
+
+      const result = await newCollect.save()
+
+      if (result.uid) {
+        ctx.body = {
+          code: 200,
+          data: result,
+          msg: '收藏成功'
+        }
       }
     }
   }

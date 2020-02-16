@@ -13,4 +13,7 @@ router.get('/fav', userController.userSign)
 // 更新用户的基本信息
 router.post('/basic', userController.updateUserInfo)
 
+// 取消/设置收藏
+router.get('/set-collect', userController.setCollect)
+
 export default router

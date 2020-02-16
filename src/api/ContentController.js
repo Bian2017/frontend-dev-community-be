@@ -1,6 +1,7 @@
 import Post from '@/model/Post'
 import Links from '@/model/Links'
 import User from '@/model/User'
+import UserCollect from '@/model/UserCollect'
 import fs from 'fs' // 操作本地文件
 import uuid from 'uuid/v4'
 import dayjs from 'dayjs'
@@ -246,11 +247,29 @@ class ContentController {
     }
 
     const post = await Post.findByTid(query.tid)
+
+    let isFav = 0 // 是否收藏
+    // 判断用户是否登录
+    if (typeof ctx.header.authorization !== 'undefined' && ctx.header.authorization !== '') {
+      const obj = await getJWTPayload(ctx.header.authorization)
+      // 查看用户的收藏记录
+      const userCollect = await UserCollect.findOne({
+        uid: obj._id,
+        tid: query.tid
+      })
+
+      if (userCollect && userCollect.tid) {
+        isFav = 1
+      }
+    }
+    const newPost = post.toJSON()
+    newPost.isFav = isFav
+
     // 更新文章阅读计数
     const reads = await Post.updateOne({ _id: query.tid }, { $inc: { reads: 1 } })
 
     // 更改字段名称
-    const result = rename(post.toJSON(), 'uid', 'user')
+    const result = rename(newPost, 'uid', 'user')
 
     if (post._id && reads.ok === 1) {
       ctx.body = {
