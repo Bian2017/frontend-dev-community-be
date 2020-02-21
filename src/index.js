@@ -61,4 +61,4 @@ app
   // 拦截器，拦截应用中没有的请求，返回4xx错误或者5xx错误
   .use(router.allowedMethods())
 
-app.listen(3001)
+app.listen(3000)
